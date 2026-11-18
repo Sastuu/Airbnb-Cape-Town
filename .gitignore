@@ -1,0 +1,26 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Data (raw/processed) - keep data out of git; document download/source in README
+data/
+Data/
+*.csv
+*.csv.gz
+*.parquet
+
+# Notebooks and Python artifacts
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Streamlit (optional local secrets)
+.streamlit/secrets.toml
