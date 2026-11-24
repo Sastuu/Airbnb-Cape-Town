@@ -24,3 +24,8 @@ Thumbs.db
 
 # Streamlit (optional local secrets)
 .streamlit/secrets.toml
+
+# Project brief/checklist (local reference docs)
+capstone-brief.md
+capstone-checklist.md
+todo.md

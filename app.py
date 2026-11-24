@@ -11,7 +11,7 @@ from pathlib import Path
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="Cape Town Superhost Intelligence",
-    page_icon="🏠",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -103,14 +103,14 @@ def predict_superhost_proba(model, X: pd.DataFrame) -> float:
 # -----------------------------------------------------------------------------
 # Sidebar
 # -----------------------------------------------------------------------------
-st.sidebar.title("🏠 Navigation")
+st.sidebar.title("Navigation")
 page = st.sidebar.radio(
     "Module",
     [
-        "🎯 Superhost Predictor",
-        "📁 Batch Scoring",
-        "📊 Insights (sample)",
-        "🧠 Model & App Notes",
+        "Superhost Predictor",
+        "Batch Scoring",
+        "Insights (sample)",
+        "Model & App Notes",
     ],
 )
 
@@ -133,8 +133,8 @@ st.sidebar.caption(
 # -----------------------------------------------------------------------------
 # Module 1: Single prediction
 # -----------------------------------------------------------------------------
-if page == "🎯 Superhost Predictor":
-    st.title("🎯 Superhost Probability Predictor")
+if page == "Superhost Predictor":
+    st.title("Superhost Probability Predictor")
     st.markdown(
         "Estimate the probability that a listing's host is a **Superhost** based on listing and host-related features. "
         "Adjust inputs to explore how the model responds."
@@ -147,7 +147,7 @@ if page == "🎯 Superhost Predictor":
             "You can still design and test the input form now."
         )
 
-    with st.expander("🛠️ Listing profile inputs", expanded=True):
+    with st.expander("Listing profile inputs", expanded=True):
         c1, c2, c3 = st.columns(3)
         with c1:
             st.subheader("Location & type")
@@ -184,7 +184,7 @@ if page == "🎯 Superhost Predictor":
     X_input = build_input_row(inputs)
 
     st.markdown("---")
-    if st.button("🚀 Predict Superhost probability", type="primary", disabled=(pipeline is None)):
+    if st.button("Predict Superhost probability", type="primary", disabled=(pipeline is None)):
         try:
             proba = predict_superhost_proba(pipeline, X_input)
             pred_label = "Likely Superhost" if proba >= threshold else "Not flagged as Superhost"
@@ -245,15 +245,15 @@ if page == "🎯 Superhost Predictor":
 # -----------------------------------------------------------------------------
 # Module 2: Batch scoring
 # -----------------------------------------------------------------------------
-elif page == "📁 Batch Scoring":
-    st.title("📁 Batch Superhost Scoring")
+elif page == "Batch Scoring":
+    st.title("Batch Superhost Scoring")
     st.markdown(
         "Upload a CSV with the same columns used by the app/pipeline to score many listings at once."
     )
 
     template = pd.DataFrame([{c: "" for c in APP_FEATURES}])
     st.download_button(
-        "📥 Download CSV template (app schema)",
+        "Download CSV template (app schema)",
         data=template.to_csv(index=False).encode("utf-8"),
         file_name="superhost_batch_template.csv",
         mime="text/csv",
@@ -272,7 +272,7 @@ elif page == "📁 Batch Scoring":
             missing = [c for c in APP_FEATURES if c not in df_in.columns]
             if missing:
                 st.error(f"Missing required columns: {missing}")
-            elif st.button("⚙️ Score batch", disabled=(pipeline is None)):
+            elif st.button("Score batch", disabled=(pipeline is None)):
                 X_batch = df_in[APP_FEATURES].copy()
                 probas = pipeline.predict_proba(X_batch)
                 p = probas[:, 1] if probas.shape[1] == 2 else probas.max(axis=1)
@@ -287,7 +287,7 @@ elif page == "📁 Batch Scoring":
 
                 st.dataframe(out.head(20), use_container_width=True)
                 st.download_button(
-                    "💾 Download scored results",
+                    "Download scored results",
                     data=out.to_csv(index=False).encode("utf-8"),
                     file_name="scored_superhost_predictions.csv",
                     mime="text/csv",
@@ -298,8 +298,8 @@ elif page == "📁 Batch Scoring":
 # -----------------------------------------------------------------------------
 # Module 3: Sample insights (illustrative; replace/extend with your findings)
 # -----------------------------------------------------------------------------
-elif page == "📊 Insights (sample)":
-    st.title("📊 Sample Insights")
+elif page == "Insights (sample)":
+    st.title("Sample Insights")
     st.markdown(
         "This page is a **starter visualization area**. Replace or augment it with charts from your EDA and model results "
         "(saved figures or summary tables) so the app tells a richer story."
@@ -339,8 +339,8 @@ elif page == "📊 Insights (sample)":
 # -----------------------------------------------------------------------------
 # Module 4: Model notes
 # -----------------------------------------------------------------------------
-elif page == "🧠 Model & App Notes":
-    st.title("🧠 Model & App Notes")
+elif page == "Model & App Notes":
+    st.title("Model & App Notes")
     st.markdown("Use this page to document what the deployed model is, how to use it, and what to trust it for.")
 
     t1, t2, t3 = st.tabs(["Pipeline", "App schema", "About & credit"])
