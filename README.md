@@ -34,21 +34,21 @@ A machine learning capstone project that predicts whether an Airbnb host in Cape
 
 ### Task C - Superhost Classification (deployed in app)
 - **Target:** `host_is_superhost` (`t/f` -> `1/0`)
-- **Final model in app:** `XGBClassifier(n_estimators=300, max_depth=4, learning_rate=0.05, subsample=0.9, colsample_bytree=0.9, scale_pos_weight=neg/pos, eval_metric='logloss', random_state=42)` in a pipeline with median imputation for numeric features and most-frequent + one-hot encoding for categorical features. This matches the best validation F1/ROC-AUC model family in H8 and is saved as `models/superhost_pipeline.joblib`.
+- **Final model in app:** `XGBClassifier(n_estimators=300, max_depth=4, learning_rate=0.05, subsample=0.9, colsample_bytree=0.9, scale_pos_weight=neg/pos, eval_metric='logloss', random_state=42)` in a pipeline with median imputation + `StandardScaler` for numeric features and most-frequent imputation + one-hot encoding for categorical features. This matches the best validation F1/ROC-AUC model family in H8 and is saved as `models/superhost_pipeline.joblib`.
 - **App features:** `neighbourhood_cleansed, room_type, accommodates, bedrooms, bathrooms_count, minimum_nights, number_of_reviews, review_scores_rating, availability_365, amenities_count`
 - **Metrics chosen:** Accuracy, Precision, Recall, F1, ROC-AUC  
   *Why:* Accuracy alone can look acceptable on imbalanced Superhost labels while missing real Superhosts. Precision matters to avoid wasting support-team time on false alarms; recall matters to avoid missing true Superhosts; F1 balances both; ROC-AUC measures ranking quality across thresholds.
 - **Final test scores (app-feature XGBoost pipeline, same group-aware split, run once):**
-  - Accuracy: 0.7314
-  - Precision: 0.5894
-  - Recall: 0.6698
-  - F1: 0.6271
-  - ROC-AUC: 0.7862
-- **Chosen threshold:** 0.50 (review against support-team capacity; retune threshold on validation for the XGBoost model before final submission)
+  - Accuracy: 0.7339
+  - Precision: 0.5936
+  - Recall: 0.6676
+  - F1: 0.6285
+  - ROC-AUC: 0.7847
+- **Chosen threshold:** 0.30 (selected from J4 threshold sweep on the XGBoost app pipeline). *Why:* At 0.30, precision is 0.474, recall is 0.754, F1 is 0.582 (highest in the sweep), flagging 2,167 listings. For a host-support team, missing true Superhosts (false negatives) is costly for recognition/coaching opportunities, while false positives are a review-queue cost. A 0.30 threshold prioritizes recall while keeping precision reasonable for a triage workflow; if team capacity is tighter, 0.40 or 0.50 trades recall for fewer flags.
 
 ### Task R - Price Regression (notebook only)
 - **Target:** `price` parsed from currency text (e.g. `$1,114.00`) to numeric ZAR (`price_clean`); blank/invalid/non-positive prices treated as invalid for Task R and excluded from Task R modeling/evaluation.
-- **Final model:** Selected by notebook J1 validation RMSE among fitted regression candidates (see notebook for exact selected model). Test metrics below are from the J1 final test output.
+- **Final model:** Ridge regression (selected in J1 by lowest validation RMSE among fitted Linear/Ridge/Lasso candidates; confirm in your notebook run). Test metrics below are from the J1 final test output.
 - **Metrics chosen:** RMSE and MAE (ZAR)  
   *Why:* MAE gives an easy-to-read average rand error; RMSE penalizes large mistakes more heavily, which matters for pricing because a few very bad price predictions can be costly.
 - **Final test scores (run once, from notebook J1):**
@@ -67,7 +67,7 @@ A machine learning capstone project that predicts whether an Airbnb host in Cape
 ### 1. Setup
 ```bash
 # clone the repo
-git clone <your-repo-url>
+git clone https://github.com/Sastuu/Airbnb-Cape-Town
 cd airbnb-cape-town
 
 # create and activate virtual environment
@@ -105,10 +105,11 @@ The app loads `models/superhost_pipeline.joblib`. If the model file is missing, 
 | Price parsing & cleaning | Drop all messy price rows vs parse/inspect/cap with rules | Parsed `$`/commas/blanks to numeric `price_clean`, inspected extremes row-by-row, and excluded invalid/non-positive prices from Task R while documenting impact. |
 | Task C metrics | Accuracy only vs Precision/Recall/F1/ROC-AUC | Superhost labels are imbalanced; accuracy can hide poor minority-class detection. F1/precision/recall/ROC-AUC better reflect support-team tradeoffs. |
 | App feature schema | Use raw `bathrooms`/`instant_bookable` vs parsed/engineered features | Final app uses 10 known-at-prediction-time features including `bathrooms_count` and `amenities_count`; `instant_bookable` was excluded because the snapshot had no usable values. |
-| Deployed Task C model | Logistic Regression / Decision Tree / Random Forest / Gradient Boosting / XGBoost | XGBoost had the strongest validation F1/ROC-AUC in H8 and was saved as the app pipeline (`models/superhost_pipeline.joblib`, ~0.45 MB). The tradeoff is lower interpretability than logistic regression, so keep coefficient/importance explanations and threshold review in the notebook/app notes. |
+| Deployed Task C model | Logistic Regression / Decision Tree / Random Forest / Gradient Boosting / XGBoost | XGBoost had the strongest validation F1/ROC-AUC in H8 and was saved as the app pipeline (`models/superhost_pipeline.joblib`, ~0.45 MB). The tradeoff is lower interpretability than logistic regression, so keep coefficient/importance explanations and threshold review in the notebook/app notes. If `MANUAL_BEST_C_MODEL` is set in J1, document the rubric-based reason here. |
+| Threshold choice | 0.2–0.7 sweep (J4) | Chose **0.30** for the XGBoost app pipeline: highest F1 (0.582) with strong recall (0.754) and acceptable precision (0.474), flagging 2,167 listings. This fits a support-team triage use case where missing Superhosts is costlier than reviewing extra flagged hosts; adjust upward if review capacity is limited. |
 
 ## What I Would Do Next
-- **Improve model selection/deployment:** Reconcile the validation-best model (XGBoost in H8) with the deployed app model by retraining/saving the chosen best-fit pipeline, checking calibration, and validating file size/latency.
+- **Improve model selection/deployment:** The XGBoost app pipeline is now saved/deployed; next, confirm probability calibration, monitor/confirm the 0.30 threshold on validation/new data, and compare against the full-notebook best-fit choice if features differ.
 - **Better features and validation:** Add temporal validation/newer snapshots, richer location/features, and careful text/image features (NLP/photos) with leakage controls.
 - **Fairness and monitoring:** Audit subgroup performance (room type, neighbourhood, host portfolio size), add monitoring for drift, and document responsible-use limits for decision support.
 
