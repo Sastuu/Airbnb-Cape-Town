@@ -64,25 +64,24 @@ else:
 # App schema (MUST match the features used to train the saved pipeline)
 # Update these choices to exactly match your final selected app features.
 # -----------------------------------------------------------------------------
-# TODO: Replace this list/order with the 8–12 features you chose for the app.
+# IMPORTANT: Keep this in sync with APP_FEATURES in notebooks/01_airbnb_capstone.ipynb (L1/L3).
 # The DataFrame passed to the pipeline must have the same column names and dtypes as training.
 APP_FEATURES = [
     "neighbourhood_cleansed",
     "room_type",
     "accommodates",
     "bedrooms",
-    "bathrooms",
+    "bathrooms_count",
     "minimum_nights",
     "number_of_reviews",
     "review_scores_rating",
     "availability_365",
-    "instant_bookable",
+    "amenities_count",
 ]
 
 ROOM_TYPES = ["Entire home/apt", "Private room", "Shared room", "Hotel room"]
-INSTANT_BOOKABLE = ["f", "t"]
 
-# A small starter list; consider loading unique values from processed data or a saved artifact.
+# A small starter list; replace with the full set from your processed data/artifact.
 NEIGHBOURHOODS = [
     "Ward 1", "Ward 4", "Ward 23", "Ward 54", "Ward 55", "Ward 57",
     "Ward 64", "Ward 74", "Ward 77", "Ward 115", "Other",
@@ -153,19 +152,21 @@ if page == "Superhost Predictor":
             st.subheader("Location & type")
             neighbourhood = st.selectbox("Neighbourhood (cleansed)", NEIGHBOURHOODS, index=0)
             room_type = st.selectbox("Room type", ROOM_TYPES, index=0)
-            instant_bookable = st.selectbox("Instant bookable", INSTANT_BOOKABLE, index=0)
+            amenities_count = st.number_input("Amenities count", min_value=0, max_value=200, value=20, step=1,
+                                             help="Engineered feature: count of amenities (must match notebook definition).")
         with c2:
             st.subheader("Capacity")
             accommodates = st.number_input("Accommodates (guests)", min_value=1, max_value=16, value=2, step=1)
             bedrooms = st.number_input("Bedrooms", min_value=0.0, max_value=20.0, value=1.0, step=1.0)
-            bathrooms = st.number_input("Bathrooms", min_value=0.0, max_value=20.0, value=1.0, step=0.5)
+            bathrooms_count = st.number_input("Bathrooms (count)", min_value=0.0, max_value=20.0, value=1.0, step=0.5,
+                                              help="Parsed bathroom count (must match notebook parsing).")
         with c3:
             st.subheader("Stay, reviews & availability")
             minimum_nights = st.number_input("Minimum nights", min_value=1, max_value=365, value=2, step=1)
             number_of_reviews = st.number_input("Number of reviews", min_value=0, max_value=5000, value=10, step=1)
             review_scores_rating = st.number_input(
                 "Review score rating", min_value=0.0, max_value=5.0, value=4.8, step=0.01,
-                help="Use 0 or leave as-is per your training convention if missing; keep consistent with preprocessing."
+                help="Keep missing-value handling consistent with training/preprocessing."
             )
             availability_365 = st.number_input("Availability (days/year)", min_value=0, max_value=365, value=180, step=1)
 
@@ -174,12 +175,12 @@ if page == "Superhost Predictor":
         "room_type": room_type,
         "accommodates": int(accommodates),
         "bedrooms": float(bedrooms),
-        "bathrooms": float(bathrooms),
+        "bathrooms_count": float(bathrooms_count),
         "minimum_nights": int(minimum_nights),
         "number_of_reviews": int(number_of_reviews),
         "review_scores_rating": float(review_scores_rating),
         "availability_365": int(availability_365),
-        "instant_bookable": instant_bookable,
+        "amenities_count": int(amenities_count),
     }
     X_input = build_input_row(inputs)
 

@@ -6,9 +6,10 @@ env/
 # Data (raw/processed) - keep data out of git; document download/source in README
 data/
 Data/
-*.csv
-*.csv.gz
 *.parquet
+
+# If you export small app/summary CSVs outside data/, un-ignore them explicitly, e.g.:
+# !reports/summary.csv
 
 # Notebooks and Python artifacts
 .ipynb_checkpoints/
