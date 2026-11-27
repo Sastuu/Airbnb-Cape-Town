@@ -81,11 +81,22 @@ APP_FEATURES = [
 
 ROOM_TYPES = ["Entire home/apt", "Private room", "Shared room", "Hotel room"]
 
-# A small starter list; replace with the full set from your processed data/artifact.
-NEIGHBOURHOODS = [
-    "Ward 1", "Ward 4", "Ward 23", "Ward 54", "Ward 55", "Ward 57",
-    "Ward 64", "Ward 74", "Ward 77", "Ward 115", "Other",
-]
+# Load neighbourhoods from raw data if available; fall back to tracked/deployed copy.
+_neigh_csv = APP_DIR / "data" / "raw" / "neighbourhoods.csv"
+_fallback_csv = APP_DIR / "models" / "neighbourhoods.csv"
+_csv = _neigh_csv if _neigh_csv.exists() else _fallback_csv
+
+if _csv.exists():
+    try:
+        NEIGHBOURHOODS = sorted(
+            pd.read_csv(_csv)["neighbourhood"].dropna().astype(str).unique().tolist()
+        )
+    except Exception:
+        NEIGHBOURHOODS = ["Ward 1", "Ward 4", "Ward 23", "Ward 54", "Ward 55", "Ward 57",
+                          "Ward 64", "Ward 74", "Ward 77", "Ward 115", "Other"]
+else:
+    NEIGHBOURHOODS = ["Ward 1", "Ward 4", "Ward 23", "Ward 54", "Ward 55", "Ward 57",
+                      "Ward 64", "Ward 74", "Ward 77", "Ward 115", "Other"]
 
 def build_input_row(inputs: dict) -> pd.DataFrame:
     """Build a single-row DataFrame with the exact app schema."""
